@@ -1,5 +1,5 @@
 --input desired DB
-USE DWH_Zahlen_aim
+USE [DB]
 GO
 
 WITH CTE_Columns AS (
@@ -23,18 +23,18 @@ CTE_NumberedTables AS (
 	FROM CTE_COLUMNS
 	GROUP BY TABLE_NAME
 )
-SELECT '<mxfile host="app.diagrams.net" agent="Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 128.0.0.0 Safari / 537.36 Edg / 128.0.0.0" version="24.7.7"><diagram id="khBxukfFXSpXYk8diMSW" name="Seite - 1"><mxGraphModel dx="1738" dy="1258" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" />' AS DrawioStuff
+SELECT '<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0" version="24.7.7"><diagram id="khBxukfFXSpXYk8diMSW" name="Seite-1"><mxGraphModel dx="1738" dy="1258" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" />' AS DrawioStuff
 UNION ALL
 SELECT CAST(X.DrawioStuff AS VARCHAR(max)) + CAST(Y.DrawioStuff AS VARCHAR(max)) as DrawioStuff
 FROM
 (
 	SELECT
 	TableNumber,
-    '<mxCell id=" - '
+    '<mxCell id="-'
     + CHAR(TableNumber + 64)
-    + '19jqCYv2g900mhUFZz-1" value = "'
+    + '19jqCYv2g900mhUFZz-1" value="'
     + MAX(TABLE_NAME)
-    + '" style = "swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;'
+    + '" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;'
 	+
 	CASE
 		WHEN TABLE_NAME LIKE 'D\_%' ESCAPE '\' THEN 'fillColor=#e6c828;"'
@@ -47,13 +47,13 @@ FROM
 	+
 	CAST((TableNumber * 300) AS VARCHAR)
 	+
-	'" y = "0" width = "'
+	'" y="0" width="'
 	+
 	CAST(MaxNameLen * 9 AS VARCHAR(MAX))
 	+
-	'" height = "'
+	'" height="'
     + CAST(MAX(MaxRowNum + 1) * 26 AS VARCHAR(MAX))
-    + '" as= "geometry" > 
+    + '" as="geometry">
     <mxRectangle x="0" y="0" width="200" height="26" as="alternateBounds"/>
     </mxGeometry>
 	</mxCell>' as DrawioStuff
@@ -65,23 +65,23 @@ FROM
 
 	(SELECT
 		NT.TableNumber,
-		STRING_AGG('<mxCell id=" - '
+		STRING_AGG('<mxCell id="-'
 					+ CHAR(NT.TableNumber + 64)
 					+ '19jqCYv2g900mhUFZz-'
 					+ CAST(C.RowNum + 1 AS VARCHAR(MAX))
-					+ '" value = "'
+					+ '" value="'
 					+ C.COLUMN_NAME
-					+ '" style = "text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex = "1" parent = "-'
+					+ '" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="-'
 					+ CHAR(NT.TableNumber + 64)
-					+ '19jqCYv2g900mhUFZz-1" > 
+					+ '19jqCYv2g900mhUFZz-1">
 						<mxGeometry y="'
 						+ CAST(C.RowNum * 26 AS VARCHAR(MAX))
 						+
-						'" width = "'
+						'" width="'
 						+
 						CAST(MaxNameLen * 9 AS VARCHAR(MAX))
 						+
-						'" height = "26" as= "geometry" /> 
+						'" height="26" as="geometry" />
 					</mxCell>', '') AS DrawioStuff
 	FROM CTE_Columns AS C
 	JOIN CTE_NumberedTables NT ON C.TABLE_NAME = NT.TABLE_NAME
@@ -92,3 +92,4 @@ FROM
 
 UNION ALL
 SELECT '</root></mxGraphModel></diagram></mxfile>' AS DrawioStuff;
+
