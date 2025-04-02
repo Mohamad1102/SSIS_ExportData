@@ -1,0 +1,94 @@
+--input desired DB
+USE DWH_Zahlen_aim
+GO
+
+WITH CTE_Columns AS (
+	SELECT
+        TABLE_NAME,
+		LEN(TABLE_NAME) AS TABLE_NAME_LENGTH,
+        COLUMN_NAME,
+		LEN(COLUMN_NAME) AS COLUMN_NAME_LENGTH,
+        ROW_NUMBER() OVER(PARTITION BY TABLE_NAME ORDER BY COLUMN_NAME ASC) AS RowNum
+    FROM INFORMATION_SCHEMA.COLUMNS
+),
+CTE_NumberedTables AS (
+	SELECT
+		TABLE_NAME,
+		MAX(CASE 
+                WHEN LEN(TABLE_NAME) > LEN(COLUMN_NAME) THEN LEN(TABLE_NAME) 
+                ELSE LEN(COLUMN_NAME) 
+            END) AS MaxNameLen,
+		MAX(RowNum) AS MaxRowNum,
+		ROW_NUMBER() OVER(ORDER BY TABLE_NAME ASC) AS TableNumber
+	FROM CTE_COLUMNS
+	GROUP BY TABLE_NAME
+)
+SELECT '<mxfile host="app.diagrams.net" agent="Mozilla / 5.0(Windows NT 10.0; Win64; x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 128.0.0.0 Safari / 537.36 Edg / 128.0.0.0" version="24.7.7"><diagram id="khBxukfFXSpXYk8diMSW" name="Seite - 1"><mxGraphModel dx="1738" dy="1258" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0"><root><mxCell id="0" /><mxCell id="1" parent="0" />' AS DrawioStuff
+UNION ALL
+SELECT CAST(X.DrawioStuff AS VARCHAR(max)) + CAST(Y.DrawioStuff AS VARCHAR(max)) as DrawioStuff
+FROM
+(
+	SELECT
+	TableNumber,
+    '<mxCell id=" - '
+    + CHAR(TableNumber + 64)
+    + '19jqCYv2g900mhUFZz-1" value = "'
+    + MAX(TABLE_NAME)
+    + '" style = "swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;'
+	+
+	CASE
+		WHEN TABLE_NAME LIKE 'D\_%' ESCAPE '\' THEN 'fillColor=#e6c828;"'
+		WHEN TABLE_NAME LIKE 'F\_%' ESCAPE '\' THEN 'fillColor=#aaaafa;"'
+		ELSE 'fillColor=#ffffff;"'
+	END
+	+
+	' vertex="1" parent="1">
+    <mxGeometry x="'
+	+
+	CAST((TableNumber * 300) AS VARCHAR)
+	+
+	'" y = "0" width = "'
+	+
+	CAST(MaxNameLen * 9 AS VARCHAR(MAX))
+	+
+	'" height = "'
+    + CAST(MAX(MaxRowNum + 1) * 26 AS VARCHAR(MAX))
+    + '" as= "geometry" > 
+    <mxRectangle x="0" y="0" width="200" height="26" as="alternateBounds"/>
+    </mxGeometry>
+	</mxCell>' as DrawioStuff
+
+	FROM CTE_NumberedTables
+	GROUP BY CTE_NumberedTables.TABLE_NAME, CTE_NumberedTables.TableNumber, CTE_NumberedTables.MaxNameLen) as X
+
+	LEFT JOIN
+
+	(SELECT
+		NT.TableNumber,
+		STRING_AGG('<mxCell id=" - '
+					+ CHAR(NT.TableNumber + 64)
+					+ '19jqCYv2g900mhUFZz-'
+					+ CAST(C.RowNum + 1 AS VARCHAR(MAX))
+					+ '" value = "'
+					+ C.COLUMN_NAME
+					+ '" style = "text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex = "1" parent = "-'
+					+ CHAR(NT.TableNumber + 64)
+					+ '19jqCYv2g900mhUFZz-1" > 
+						<mxGeometry y="'
+						+ CAST(C.RowNum * 26 AS VARCHAR(MAX))
+						+
+						'" width = "'
+						+
+						CAST(MaxNameLen * 9 AS VARCHAR(MAX))
+						+
+						'" height = "26" as= "geometry" /> 
+					</mxCell>', '') AS DrawioStuff
+	FROM CTE_Columns AS C
+	JOIN CTE_NumberedTables NT ON C.TABLE_NAME = NT.TABLE_NAME
+	GROUP BY C.TABLE_NAME, NT.TableNumber
+	) AS Y
+
+	ON Y.TableNumber = X.TableNumber
+
+UNION ALL
+SELECT '</root></mxGraphModel></diagram></mxfile>' AS DrawioStuff;
